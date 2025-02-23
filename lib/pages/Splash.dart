@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:newsapp_mm/pages/home_page.dart';
 import 'package:newsapp_mm/pages/login_page.dart';
 import 'dart:async';
 
 import 'login_page.dart';
+import 'profile page.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -16,7 +18,7 @@ class _SplashScreenState extends State<SplashScreen> {
     // TODO: implement initState
     super.initState();
     Timer(Duration(seconds: 5),()=>{
-      Navigator.push(context, MaterialPageRoute(builder: (context)=>LoginPage())),
+      Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage())),
     });
   }
   @override

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:newsapp_mm/pages/home_page.dart';
 import 'package:newsapp_mm/pages/login_page.dart';
 
 
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter UI Tutorial',
       theme: ThemeData(
           fontFamily: "SF-Pro-Text"),
-      home: LoginPage(),
+      home: HomePage(),
     );
   }
 }
