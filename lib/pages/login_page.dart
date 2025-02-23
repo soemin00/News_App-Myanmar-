@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Add this import
 import 'package:newsapp_mm/pages/Signup_page.dart';
-
-//import 'Signup_page.dart';
+import 'package:newsapp_mm/pages/home_page.dart'; // Add your home page import
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -13,6 +13,31 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final _emailController = TextEditingController(); // Controller for email
+  final _passwordController =
+      TextEditingController(); // Controller for password
+  final FirebaseAuth _auth = FirebaseAuth.instance; // Firebase Auth instance
+
+  Future<void> _login() async {
+    try {
+      // Sign in with email and password
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      // Navigate to home page after successful login
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
+    } on FirebaseAuthException catch (e) {
+      // Handle login errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login failed: ${e.message}')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,14 +54,13 @@ class _LoginPageState extends State<LoginPage> {
           child: Padding(
             padding: const EdgeInsets.all(15),
             child: Form(
-             // key: formKey,
               child: Column(
                 children: [
                   const SizedBox(height: 100),
                   Image.asset(
                     'assets/images/logo_nobg.png',
-                    width: 250.0, // Set the width
-                    height: 250.0, // Set the height
+                    width: 250.0,
+                    height: 250.0,
                   ),
                   Text(
                     "Welcome Back!",
@@ -56,15 +80,15 @@ class _LoginPageState extends State<LoginPage> {
                       color: Colors.white,
                     ),
                   ),
-
                   TextFormField(
-                    //controller: _emailController,
-                    keyboardType: TextInputType.text,
+                    controller: _emailController, // Add controller
+                    keyboardType: TextInputType.emailAddress, // Change to email
                     style: const TextStyle(color: Color(0xff3C3C43)),
                     decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(vertical: 20.0),
+                      contentPadding:
+                          const EdgeInsets.symmetric(vertical: 20.0),
                       filled: true,
-                      hintText: "Username",
+                      hintText: "Email", // Change hint to Email
                       prefixIcon: IconButton(
                         onPressed: () {},
                         icon: SvgPicture.asset("assets/icons/user_icon.svg"),
@@ -78,12 +102,13 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 10),
                   TextFormField(
+                    controller: _passwordController, // Add controller
                     obscureText: true,
                     keyboardType: TextInputType.text,
                     style: const TextStyle(color: Color(0xff3C3C43)),
-                 //   controller: _passwordController,
                     decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(vertical: 20.0),
+                      contentPadding:
+                          const EdgeInsets.symmetric(vertical: 20.0),
                       filled: true,
                       hintText: "Password",
                       prefixIcon: IconButton(
@@ -115,9 +140,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
-                    onPressed: () {
-                      // add function
-                    },
+                    onPressed: _login, // Call _login function
                   ),
                   const SizedBox(height: 15),
                   SvgPicture.asset('assets/icons/deisgn.svg'),
@@ -132,14 +155,13 @@ class _LoginPageState extends State<LoginPage> {
                           BoxShadow(
                             blurRadius: 45,
                             spreadRadius: 0,
-                            color: Color.fromRGBO(
-                                201, 43, 43, 0.7),
+                            color: Color.fromRGBO(201, 43, 43, 0.7),
                             offset: Offset(0, 25),
                           )
                         ],
                         borderRadius: BorderRadius.circular(37),
-                        color: const Color.fromRGBO(
-                            4, 0, 0, 0.5372549019607843),
+                        color:
+                            const Color.fromRGBO(4, 0, 0, 0.5372549019607843),
                       ),
                       child: const Text(
                         "Sign Up",
@@ -154,7 +176,6 @@ class _LoginPageState extends State<LoginPage> {
                         context,
                         MaterialPageRoute(builder: (context) => SignupPage()),
                       );
-
                     },
                   ),
                 ],
