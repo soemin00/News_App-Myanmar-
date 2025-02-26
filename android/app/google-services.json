@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "598313134756",
+    "firebase_url": "https://newsmm-1b73d-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "newsmm-1b73d",
+    "storage_bucket": "newsmm-1b73d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:598313134756:android:754b5207598dbf612c1431",
+        "android_client_info": {
+          "package_name": "com.example.newsapp_mm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAy5mioRi7uhB_zwVSj9jjt_cvvWnV9YoU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
