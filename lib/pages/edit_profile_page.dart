@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
-//import 'package:image_picker/image_picker.dart'; // For image upload
-import 'dart:io'; // For handling file operations
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:newsapp_mm/pages/profile_page.dart';
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class EditProfilePage extends StatefulWidget {
-  const EditProfilePage({Key? key}) : super(key: key);
+  final Map<String, dynamic> userData;
+
+  const EditProfilePage({Key? key, required this.userData}) : super(key: key);
 
   @override
   _EditProfilePageState createState() => _EditProfilePageState();
@@ -11,16 +18,110 @@ class EditProfilePage extends StatefulWidget {
 
 class _EditProfilePageState extends State<EditProfilePage> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _dobController = TextEditingController();
-  final _bioController = TextEditingController();
+  late TextEditingController _usernameController;
+  late TextEditingController _emailController;
+  late TextEditingController _dobController;
+  late TextEditingController _bioController;
 
+  File? _profileImage;
+  final ImagePicker _picker = ImagePicker();
 
-  File? _profileImage; // To store the selected image
-  //final ImagePicker _picker = ImagePicker(); // For picking images
-  bool _showEditButton = false; // To control the visibility of the floating button/hover text
+  @override
+  void initState() {
+    super.initState();
+    _usernameController =
+        TextEditingController(text: widget.userData['username']);
+    _emailController = TextEditingController(text: widget.userData['email']);
+    _dobController = TextEditingController(text: widget.userData['dob']);
+    _bioController = TextEditingController(text: widget.userData['bio']);
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        setState(() {
+          _profileImage = File(image.path);
+        });
+      }
+    } catch (e) {
+      print("Error picking image: $e");
+    }
+  }
+
+  // Upload image to Cloudinary and return the URL
+  Future<String?> _uploadImageToCloudinary(File image) async {
+    try {
+      // Cloudinary API endpoint
+      final url =
+          Uri.parse('https://api.cloudinary.com/v1_1/dixeg7nch/image/upload');
+
+      // Create a multipart request
+      final request = http.MultipartRequest('POST', url)
+        ..fields['upload_preset'] = 'my_upload_preset' // Use your upload preset
+        ..files.add(await http.MultipartFile.fromPath('file', image.path));
+
+      // Send the request
+      final response = await request.send();
+
+      // Check if the upload was successful
+      if (response.statusCode == 200) {
+        final responseData = await response.stream.bytesToString();
+        final jsonResponse = jsonDecode(responseData);
+        return jsonResponse['secure_url']; // Return the image URL
+      } else {
+        print("Failed to upload image: ${response.statusCode}");
+        return null;
+      }
+    } catch (e) {
+      print("Error uploading image to Cloudinary: $e");
+      return null;
+    }
+  }
+
+  Future<void> _saveProfile() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        User? user = FirebaseAuth.instance.currentUser;
+        if (user == null) {
+          throw Exception("User not logged in");
+        }
+
+        // Upload profile image to Cloudinary
+        String? imageUrl;
+        if (_profileImage != null) {
+          imageUrl = await _uploadImageToCloudinary(_profileImage!);
+          if (imageUrl == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Failed to upload profile image!")),
+            );
+            return;
+          }
+        }
+
+        // Save profile data to Firestore
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'username': _usernameController.text.trim(),
+          'email': _emailController.text.trim(),
+          'dob': _dobController.text.trim(),
+          'bio': _bioController.text.trim(),
+          'profileImage': imageUrl ?? widget.userData['profileImage'],
+        });
+
+        // Navigate to ProfilePage
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProfilePage(userId: user.uid),
+          ),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error saving profile: $e")),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,20 +129,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Half-Circle with Gradient and Profile Image
             Stack(
               alignment: Alignment.bottomCenter,
-              clipBehavior: Clip.none, // Allow the CircleAvatar to overflow
+              clipBehavior: Clip.none,
               children: [
-                // Gradient Half-Circle Shape
                 Container(
                   height: 150,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [
-                        Color(0xffB81736), // Start color
-                        Color(0xff281537), // End color
-                      ],
+                      colors: [Color(0xffB81736), Color(0xff281537)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -51,85 +147,41 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     ),
                   ),
                 ),
-                // Profile Image (Overlapping the Half-Circle)
                 Positioned(
-                  top: 75, // Adjust this value to position the image
+                  top: 75,
                   child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _showEditButton = !_showEditButton; // Toggle floating button/hover text
-                      });
-                    },
+                    onTap:
+                        _pickImage, // Open image picker when CircleAvatar is clicked
                     child: Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white, // Add a border for better visibility
-                          width: 4,
-                        ),
+                        border: Border.all(color: Colors.white, width: 4),
                       ),
                       child: CircleAvatar(
                         radius: 60,
                         backgroundColor: Colors.grey[300],
                         backgroundImage: _profileImage != null
-                            ? FileImage(_profileImage!) // Use selected image
-                            : null,
-                        child: _profileImage == null
+                            ? FileImage(_profileImage!)
+                            : widget.userData['profileImage'] != null
+                                ? NetworkImage(widget.userData['profileImage'])
+                                : null,
+                        child: _profileImage == null &&
+                                widget.userData['profileImage'] == null
                             ? Icon(Icons.person, size: 60, color: Colors.white)
                             : null,
                       ),
                     ),
                   ),
                 ),
-                // Floating Button/Hover Text
-                if (_showEditButton)
-                  Positioned(
-                    top: 160, // Adjust this value to position the button
-                    child: GestureDetector(
-                      onTap: (){},
-                      //onTap: _pickImage, // Open gallery to select image
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.white, // White background
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 5,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.edit, color: Color(0xffB81736)), // Edit icon
-                            SizedBox(width: 8),
-                            Text(
-                              "Edit Profile",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color(0xffB81736), // Theme color for text
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
               ],
             ),
-            SizedBox(height: 80), // Add space below the profile image
-
-            // Profile Form
+            SizedBox(height: 80),
             Padding(
               padding: EdgeInsets.all(16.0),
               child: Form(
                 key: _formKey,
                 child: Column(
                   children: [
-                    // Username Field
                     TextFormField(
                       controller: _usernameController,
                       decoration: InputDecoration(
@@ -147,8 +199,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       },
                     ),
                     SizedBox(height: 20),
-
-                    //email field
                     TextFormField(
                       controller: _emailController,
                       decoration: InputDecoration(
@@ -166,26 +216,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       },
                     ),
                     SizedBox(height: 20),
-
-                    TextFormField(
-                      controller: _passwordController,
-                      decoration: InputDecoration(
-                        labelText: "Password",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        prefixIcon: Icon(Icons.key),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Please enter your new password";
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 20),
-
-                    // Date of Birth Field
                     TextFormField(
                       controller: _dobController,
                       decoration: InputDecoration(
@@ -205,7 +235,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         if (pickedDate != null) {
                           setState(() {
                             _dobController.text =
-                            "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+                                "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
                           });
                         }
                       },
@@ -217,8 +247,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       },
                     ),
                     SizedBox(height: 20),
-
-                    // Bio Field
                     TextFormField(
                       controller: _bioController,
                       decoration: InputDecoration(
@@ -235,16 +263,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         return null;
                       },
                     ),
-
                     SizedBox(height: 30),
-
-                    // Save Button
                     ElevatedButton(
-                      onPressed: (){},
-                      //onPressed: _saveProfile,
+                      onPressed: _saveProfile,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xffB81736), // Use your theme color
-                        padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                        backgroundColor: Color(0xffB81736),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.0),
                         ),
@@ -263,27 +288,4 @@ class _EditProfilePageState extends State<EditProfilePage> {
       ),
     );
   }
-
-// Function to pick an image from the gallery
-// Future<void> _pickImage() async {
-//   final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-//   if (image != null) {
-//     setState(() {
-//       _profileImage = File(image.path); // Set the selected image
-//       _showEditButton = false; // Hide the floating button/hover text after selection
-//     });
-//   }
-// }
-//
-// // Function to save profile (commented for now)
-// void _saveProfile() {
-//   if (_formKey.currentState!.validate()) {
-//     // Save profile logic here
-//     // Example: Upload image to Firebase Storage, save data to Firestore, etc.
-//     // Uncomment and implement Firebase code later.
-//     ScaffoldMessenger.of(context).showSnackBar(
-//       SnackBar(content: Text("Profile saved successfully!")),
-//     );
-//   }
-// }
 }

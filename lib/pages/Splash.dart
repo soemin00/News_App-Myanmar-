@@ -4,7 +4,7 @@ import 'package:newsapp_mm/pages/login_page.dart';
 import 'dart:async';
 
 import 'login_page.dart';
-import 'profile page.dart';
+import 'profile_page.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -17,10 +17,14 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    Timer(Duration(seconds: 5),()=>{
-      Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage())),
-    });
+    Timer(
+        Duration(seconds: 5),
+        () => {
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => HomePage())),
+            });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,8 +54,9 @@ class _SplashScreenState extends State<SplashScreen> {
                         radius: 70.0,
                         child: Image.asset('assets/images/logo_nobg.png'),
                       ),
-                      Padding(padding: EdgeInsets.only(top: 40.0 )),
-                      Text("Loading Please Wait...",
+                      Padding(padding: EdgeInsets.only(top: 40.0)),
+                      Text(
+                        "Loading Please Wait...",
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 28.0,
@@ -69,7 +74,8 @@ class _SplashScreenState extends State<SplashScreen> {
                   children: [
                     CircularProgressIndicator(),
                     Padding(padding: EdgeInsets.only(top: 20.0)),
-                    Text("Please wait",
+                    Text(
+                      "Please wait",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 24.0,
@@ -85,4 +91,3 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 }
-

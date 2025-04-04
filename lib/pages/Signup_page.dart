@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // Add this import
 import 'package:cloud_firestore/cloud_firestore.dart'; // Add this import
+import 'package:newsapp_mm/pages/Splash.dart';
 import 'package:newsapp_mm/pages/login_page.dart';
 import 'package:newsapp_mm/pages/home_page.dart'; // Add your home page import
 
@@ -51,7 +52,7 @@ class _SignupPageState extends State<SignupPage> {
       // Navigate to home page after successful signup
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomePage()),
+        MaterialPageRoute(builder: (context) => SplashScreen()),
       );
     } on FirebaseAuthException catch (e) {
       // Handle signup errors

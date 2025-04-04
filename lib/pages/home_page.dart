@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:newsapp_mm/pages/Content_upload.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:newsapp_mm/pages/edit_profile_page.dart';
 import 'package:newsapp_mm/pages/Signup_page.dart';
 import 'package:newsapp_mm/pages/Splash.dart';
 import 'package:newsapp_mm/pages/login_page.dart';
-import 'package:newsapp_mm/pages/profile page.dart';
+import 'package:newsapp_mm/pages/profile_page.dart';
+import 'package:newsapp_mm/pages/Content_upload.dart';
+import 'package:newsapp_mm/pages/news_feed.dart';
+import 'package:newsapp_mm/pages/my_post.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -14,15 +19,39 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0; // Index for bottom navigation bar
+  String? _profileImageUrl; // To store the profile image URL
 
   // Bottom navigation bar items
-  static List<Widget> _pages = [
+  static final List<Widget> _pages = [
     HomeContent(), // Home page content
-    CategoriesPage(), // News Feed page (placeholder)
+    NewsFeedPage(), // News Feed page (placeholder)
     UploadContentPage(), // Post Content page
-    BookmarksPage(), // Bookmarks page (placeholder)
-    //ProfilePage(), // Profile page (placeholder)
+    MyPostsPage(),
+    ProfilePage(userId: FirebaseAuth.instance.currentUser!.uid), // Profile page
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchProfileImage(); // Fetch profile image when the page loads
+  }
+
+  // Fetch profile image URL from Firestore
+  Future<void> _fetchProfileImage() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+
+    if (userDoc.exists) {
+      setState(() {
+        _profileImageUrl = userDoc['profileImage'];
+      });
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -45,13 +74,40 @@ class _HomePageState extends State<HomePage> {
         ),
         backgroundColor: Color(0xFFFFFFFF), // Use your theme color
         actions: [
-          IconButton(
-            icon: Icon(Icons.person_4_rounded),
-            color: Colors.red,
-            onPressed: () {
-              // Navigate to profile page
-              Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage()));
+          // Display profile image or default icon
+          GestureDetector(
+            onTap: () async {
+              try {
+                // Fetch user data
+                final userData = await _fetchUserData();
+
+                // Navigate to ProfilePage with user data
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ProfilePage(
+                        userId: FirebaseAuth.instance.currentUser!.uid),
+                  ),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Error fetching user data: $e")),
+                );
+              }
             },
+            child: Padding(
+              padding: EdgeInsets.all(8.0),
+              child: _profileImageUrl != null
+                  ? CircleAvatar(
+                      backgroundImage: NetworkImage(_profileImageUrl!),
+                      radius: 20,
+                    )
+                  : Icon(
+                      Icons.person_4_rounded,
+                      color: Colors.red,
+                      size: 30,
+                    ),
+            ),
           ),
         ],
       ),
@@ -95,7 +151,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             // Bookmarks Tab
-            _buildBottomNavItem(Icons.bookmark, "Bookmarks", 3),
+            _buildBottomNavItem(Icons.bookmark, "My Post", 3),
             // Profile Tab
             _buildBottomNavItem(Icons.person, "Profile", 4),
           ],
@@ -130,6 +186,25 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
+  }
+
+  // Fetch user data from Firestore
+  Future<Map<String, dynamic>> _fetchUserData() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception("User not logged in");
+    }
+
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+
+    if (!userDoc.exists) {
+      throw Exception("User data not found");
+    }
+
+    return userDoc.data() as Map<String, dynamic>;
   }
 }
 
@@ -174,19 +249,9 @@ class HomeContent extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: AssetImage('assets/images/breaking_news_banner.jpg'), // Add a breaking news image
+          image: AssetImage(
+              'assets/images/breaking_news_banner.jpg'), // Add a breaking news image
           fit: BoxFit.cover,
-        ),
-      ),
-      child: Center(
-        child: Text(
-          "Breaking News: Major Event Happening Now!",
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            backgroundColor: Colors.black.withOpacity(0.5),
-          ),
         ),
       ),
     );

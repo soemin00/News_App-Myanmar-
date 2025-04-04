@@ -1,0 +1,2 @@
+C:/Users/LENOVO/Desktop/Flutter/8th Sem/NEWSMM/android/app/.cxx/RelWithDebInfo/3x6d3e3h/x86/CMakeFiles/edit_cache.dir
+C:/Users/LENOVO/Desktop/Flutter/8th Sem/NEWSMM/android/app/.cxx/RelWithDebInfo/3x6d3e3h/x86/CMakeFiles/rebuild_cache.dir

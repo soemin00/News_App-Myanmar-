@@ -3,6 +3,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart'; // Import the generated file
 import 'package:newsapp_mm/pages/home_page.dart';
 import 'package:newsapp_mm/pages/login_page.dart';
+import 'package:newsapp_mm/pages/profile_page.dart';
+import 'package:newsapp_mm/pages/Content_upload.dart';
+import 'package:newsapp_mm/pages/news_feed.dart';
 
 void main() async {
   // Ensure Flutter binding is initialized
