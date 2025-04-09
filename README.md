@@ -44,21 +44,20 @@ Developed as part of our final-year major project at Marwadi University, this ap
 
 ## 🛠️ Installation Guide
 
-1. **Clone the Repository**
-
+1. Clone the Repo
 ```bash
 git clone https://github.com/soemin00/News_App-Myanmar-.git
 cd News_App-Myanmar-
 
-2. **Install Dependencies**
+2. Install Dependencies
 
 flutter pub get
 
-3. **Configure APIs**
+3. Configure APIs
   * Add your Firebase configuration in firebase_options.dart
   * Set your NewsAPI key in your API service
   * Set your Cloudinary credentials if using image upload
 
-4. **Run The App**
+4. Run The App
 
 flutter run
