@@ -44,8 +44,9 @@ Developed as part of our final-year major project at Marwadi University, this ap
 
 ## 🛠️ Installation Guide
 
-1. Clone the Repo
-```bash
+
+
+1. Clone The Repo
 git clone https://github.com/soemin00/News_App-Myanmar-.git
 cd News_App-Myanmar-
 
