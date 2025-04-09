@@ -52,7 +52,7 @@ cd News_App-Myanmar-
 
 2. Install Dependencies
 
-flutter pub get
+  flutter pub get
 
 3. Configure APIs
   * Add your Firebase configuration in firebase_options.dart
@@ -61,4 +61,4 @@ flutter pub get
 
 4. Run The App
 
-flutter run
+  flutter run
