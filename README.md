@@ -31,7 +31,6 @@ Our goal: **Ensure critical information reaches people exactly when they need it
 |:----:|:---------:|:---------:|
 | ![Home Screen](screenshots/home.png) | ![News Feed](screenshots/newsfeed.png) | ![Post News](screenshots/postnews.png) |
 
-> (Add your screenshots inside `/screenshots` folder)
 
 ---
 
@@ -83,16 +82,6 @@ Our goal: **Ensure critical information reaches people exactly when they need it
 - [Myanmar Digital News](https://play.google.com/store/apps/details?id=com.myanmarnewsfrmv.app)
 - [Amn Myanmar News](https://play.google.com/store/apps/details?id=com.allmmnews.app)
 - [News App Flutter Template](https://github.com/AbhishekChd/NewsApp.git)
-
----
-
-## 👨‍💻 Developed by
-
-- **May Thazin** (Enrollment No: 92100103067) - Section TC1
-- **Soe Min Oo** (Enrollment No: 92100103345) - Section TC5
-- **Wai Yan Kyaw** (Enrollment No: 92100103419) - Section TC5
-
-**Department of Computer Engineering, Faculty of Technology, Marwadi University**
 
 ---
 
